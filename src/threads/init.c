@@ -63,7 +63,8 @@ static void paging_init (void);
 static char **read_command_line (void);
 static char **parse_options (char **argv);
 static void run_actions (char **argv);
-static void usage (void);
+static void usage(void);
+static void interavtive_shell(void);
 
 #ifdef FILESYS
 static void locate_block_devices (void);
@@ -133,7 +134,8 @@ pintos_init (void)
     /* Run actions specified on kernel command line. */
     run_actions (argv);
   } else {
-    // TODO: no command line passed to kernel. Run interactively 
+    // TODO: no command line passed to kernel. Run interactively
+    interavtive_shell();
   }
 
   /* Finish up. */
@@ -388,6 +390,14 @@ usage (void)
 #endif
           );
   shutdown_power_off ();
+}
+
+static void
+interavtive_shell(void)
+{
+  while (true) {
+    printf("PKUOS>");
+  }
 }
 
 #ifdef FILESYS
