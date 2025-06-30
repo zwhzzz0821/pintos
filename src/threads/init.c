@@ -392,11 +392,44 @@ usage (void)
   shutdown_power_off ();
 }
 
-static void
-interavtive_shell(void)
-{
+static void interavtive_shell(void) {
   while (true) {
-    printf("PKUOS>");
+    vprintf("PKUOS>", NULL);
+    uint8_t input;
+    char *buffer = malloc(256);
+    size_t buffer_index = 0;
+    while (input = input_getc()) {
+      if (input == '\n' || input == '\r') {
+        if (buffer_index == 0) {
+          vprintf("\n", NULL);
+          vprintf("PKUOS>", NULL);
+          continue; // Ignore empty input
+        }
+
+        if (memcmp(buffer, "whoami", buffer_index) == 0) {
+          vprintf("\n216001309", NULL);
+        } else if (memcmp(buffer, "exit", buffer_index) == 0) {
+          free(buffer);
+          shutdown_power_off();
+          return ;
+        } else {
+          vprintf("\ninvalid command", NULL);
+        }
+        buffer_index = 0;
+        vprintf("\n", NULL);
+        break;
+      } else if (input == 0x7f || input == 0x08) { // Backspace
+        if (buffer_index == 0) {
+          continue; // Ignore backspace at the start
+        }
+        vprintf("\b \b", NULL);
+        buffer_index--;
+      } else {
+        putchar(input);
+        buffer[buffer_index++] = input;
+      }
+    }
+    free(buffer);
   }
 }
 
