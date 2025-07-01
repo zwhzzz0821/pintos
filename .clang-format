@@ -1,0 +1,14 @@
+# clang-format configuration for Pintos code style
+
+BasedOnStyle: Google
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 80
+BreakBeforeBraces: Allman
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: false
+BinPackParameters: false
+SpacesBeforeTrailingComments: 2
+SpaceBeforeParens: ControlStatements
+Cpp11BracedListStyle: true

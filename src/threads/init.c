@@ -398,7 +398,7 @@ static void interavtive_shell(void) {
     uint8_t input;
     char *buffer = malloc(256);
     size_t buffer_index = 0;
-    while (input = input_getc()) {
+    while ((input = input_getc())) {
       if (input == '\n' || input == '\r') {
         if (buffer_index == 0) {
           vprintf("\n", NULL);
