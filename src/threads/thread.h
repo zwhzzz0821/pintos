@@ -6,8 +6,7 @@
 #include <stdint.h>
 
 /** States in a thread's life cycle. */
-enum thread_status
-{
+enum thread_status {
   THREAD_RUNNING, /**< Running thread. */
   THREAD_READY,   /**< Not running but ready to run. */
   THREAD_BLOCKED, /**< Waiting for an event to trigger. */
@@ -81,8 +80,7 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
-struct thread
-{
+struct thread {
   /* Owned by thread.c. */
   tid_t tid;                 /**< Thread identifier. */
   enum thread_status status; /**< Thread state. */
@@ -145,12 +143,13 @@ int thread_get_load_avg(void);
 
 void thread_schedule_wakeup(int64_t ticks);
 
+void thread_donate_priority(struct thread *t, uint8_t donate_depth,
+                            int priority);
+
 /** compare func */
 bool thread_priority_greater(const struct list_elem *a,
-                             const struct list_elem *b,
-                             void *aux UNUSED);
+                             const struct list_elem *b, void *aux UNUSED);
 bool thread_wakeup_time_less(const struct list_elem *a,
-                             const struct list_elem *b,
-                             void *aux UNUSED);
+                             const struct list_elem *b, void *aux UNUSED);
 
 #endif /**< threads/thread.h */

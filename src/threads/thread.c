@@ -217,11 +217,10 @@ thread_create (const char *name, int priority,
    is usually a better idea to use one of the synchronization
    primitives in synch.h. */
 void
-thread_block (void) 
+thread_block (void)
 {
   ASSERT (!intr_context ());
   ASSERT (intr_get_level () == INTR_OFF);
-
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();
 }
@@ -235,7 +234,7 @@ thread_block (void)
    it may expect that it can atomically unblock a thread and
    update other data. */
 void
-thread_unblock (struct thread *t) 
+thread_unblock (struct thread *t)
 {
   enum intr_level old_level;
 
@@ -243,11 +242,14 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT(t->status == THREAD_BLOCKED);
-  list_insert_ordered(&ready_list, &t->elem, thread_priority_greater, NULL);
-  if (t != idle_thread && t->priority > thread_current()->priority) {
+  t->status = THREAD_READY;
+  if (t != idle_thread) {
+    list_insert_ordered(&ready_list, &t->elem, thread_priority_greater, NULL);
+  }
+  if (t != idle_thread && thread_current() != idle_thread &&
+  t->priority > thread_current()->priority) { // idle thread can't be added to ready_list
     thread_yield(); // Yield if the unblocked thread has a higher priority
   }
-  t->status = THREAD_READY;
   intr_set_level (old_level);
 }
 
@@ -274,7 +276,9 @@ thread_awake(struct thread *t)
   t->status = THREAD_READY;
   list_insert_ordered(&ready_list, &t->elem, thread_priority_greater, NULL);
   if (t != idle_thread && t->priority > thread_current()->priority) {
-    thread_yield(); // Yield if the awakened thread has a higher priority
+    intr_yield_on_return();  // Yield if the awakened thread has a higher
+                             // priority
+    // it yiled on return because in intr_context, we cannot yield directly
   }
   intr_set_level (old_level);
 }
@@ -439,7 +443,7 @@ idle (void *idle_started_ UNUSED)
   for (;;) 
     {
       /* Let someone else run. */
-      intr_disable ();
+      intr_disable();
       thread_block ();
 
       /* Re-enable interrupts and wait for the next one.
@@ -478,7 +482,7 @@ running_thread (void)
   /* Copy the CPU's stack pointer into `esp', and then round that
      down to the start of a page.  Because `struct thread' is
      always at the beginning of a page and the stack pointer is
-     somewhere in the middle, this locates the curent thread. */
+     somewhere in the middle, this locates the current thread. */
   asm ("mov %%esp, %0" : "=g" (esp));
   return pg_round_down (esp);
 }
@@ -626,6 +630,11 @@ allocate_tid (void)
 /** Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+void thread_donate_priority(struct thread *t, uint8_t donate_depth,
+                            int priority) {
+  
+  }
 
 bool thread_priority_greater(const struct list_elem *a,
                                  const struct list_elem *b, void *aux UNUSED) {
